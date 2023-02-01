@@ -12,6 +12,22 @@ Vue.component('product-details', {
   `
 })
 
+Vue.component('product-review', {
+   template: `
+   <input v-model="name">
+ `,
+   data() {
+       return {
+           name: null,
+           review: null,
+           rating: null,
+           recommend:[],
+           errors: []
+       }
+   }
+})
+
+
 Vue.component('product', {
     template: `
    <div class="product">
@@ -48,26 +64,44 @@ Vue.component('product', {
             <p>Shipping: {{ shipping }}</p>
             
             
+            
 
             <button v-on:click="addToCart"
                     :disabled="!inStock"
                     :class="{ disabledButton: !inStock }"
  >Add to cart</button>
             <button v-on:click="removeToCart">Delete</button>
+            
 
            
             </div>
             <div :class="classObject"></div>
             <div :class="[activeClass, errorClass]"></div>
+            <div>
+<h2>Reviews</h2>
+<p v-if="!reviews.length">There are no reviews yet.</p>
+<ul>
+  <li v-for="review in reviews">
+  <p>{{ review.name }}</p>
+  <p>Rating: {{ review.rating }}</p>
+  <p>{{ review.review }}</p>
+  </li>
+  
+</ul>
 
+</div>
 
         </div>
-
+        
+        <product-review @review-submitted="addReview"></product-review>
+        
     </div>
+    
  `,
     data() {
         return {
             product:'sock',
+            reviews: [],
             brand: 'Vue Mastery',
             description: 'A pair of warm fuzzy socks',
             selectedVariant: 0,
@@ -113,6 +147,30 @@ Vue.component('product', {
         removeToCart() {
             this.$emit('remove-to-cart', this.variants[this.selectedVariant].variantId)
         },
+        onSubmit() {
+            this.errors = []
+   if(this.name && this.review && this.rating && this.recommend) {
+       let productReview = {
+           name: this.name,
+           review: this.review,
+           rating: this.rating,
+           recommend: this.recommend
+       }
+       this.$emit('review-submitted', productReview)
+       this.name = null
+       this.review = null
+       this.rating = null
+       this.recommend = null
+   } else {
+       if(!this.name) this.errors.push("Name required.")
+       if(!this.review) this.errors.push("Review required.")
+       if(!this.rating) this.errors.push("Rating required.")
+       if(!this.recommend) this.errors.push("Recommendation required.")
+   }
+}
+
+
+
 
     },
 
